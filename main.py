@@ -12,7 +12,7 @@ YELLOW = (255, 215, 0)  # Coin color
 BLUE = (0, 0, 255)  # Goal color
 
 # Ensure you adjust `CELL_SIZE` to fit the new maze into the screen dimensions
-CELL_SIZE = 20  # Smaller cell size for the larger maze
+CELL_SIZE = 20  
 WIDTH, HEIGHT = 30 * CELL_SIZE, 30 * CELL_SIZE
 
 # Initialize Pygame
@@ -21,44 +21,43 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AI Coin Collector")
 
 maze = [
-    [1] * 30,
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
     [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
     [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1],
-    [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
     [1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
     [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
     [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
     [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1], 
     [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1],
     [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
     [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
     [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1],
-    [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
     [1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
-    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
+    [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
+    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
 
-# Update positions for AI, thieves, coins, and goal
+# positions for AI, thieves, coins, and goal
 ai_start = (1, 1)
-thief_positions = [(9, 15), (18, 6), (25, 20), (5, 25), (22, 14)]  # 5 thieves
 coin_positions = [
     (9,16), (18, 8), (25,22), (5, 26), (7, 8), (16, 18), (22, 20), (5, 1), (18, 1), (26, 1)
 ]  # 10 coins
-goal_position = (26, 26)  # Goal position updated for the larger grid
+goal_position = (26, 28)  
 
 
 # Function to draw the maze
@@ -89,33 +88,46 @@ def draw_maze(thief_positions):
 def heuristic(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
-# A* search algorithm
+# A* search algorithm with dynamic thief avoidance
 def a_star_search(start, goal, thief_positions):
-    frontier = []
-    heapq.heappush(frontier, (0, start))
-    came_from = {}
-    cost_so_far = {}
-    came_from[start] = None
-    cost_so_far[start] = 0
+    frontier = []     # Min-Heap that stores the shortest next step to take
+    heapq.heappush(frontier, (0, start)) # Initialize min heap with start
+    came_from = {start: None} # Map to keep track of where it has gone so far
+    cost_so_far = {start: 0} # Map to keep track of the cost to get to that specific position
+    
+    # Movement costs for avoiding thieves (dynamic weights)
+    danger_cost = 20  # Extra cost to avoid a thief
+    safe_distance = 2  # Avoid tiles within this distance of a thief
 
     while frontier:
-        current = heapq.heappop(frontier)[1]
+        current = heapq.heappop(frontier)[1] # Get the next move
 
         if current == goal:
             break
+
 
         # Explore neighbors (up, down, left, right)
         for direction in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
             neighbor = (current[0] + direction[0], current[1] + direction[1])
 
             # Check if the neighbor is walkable
-            if 0 <= neighbor[0] < len(maze) and 0 <= neighbor[1] < len(maze[0]) and maze[neighbor[0]][neighbor[1]] == 0 and neighbor not in thief_positions:
-                new_cost = cost_so_far[current] + 1
+            if 0 <= neighbor[0] < len(maze) and 0 <= neighbor[1] < len(maze[0]) and maze[neighbor[0]][neighbor[1]] == 0:
+                new_cost = cost_so_far[current] + 1  # Base cost to move to neighbor
+                
+                # Adjust cost based on proximity to thieves
+                for thief in thief_positions:
+                    distance_to_thief = heuristic(neighbor, thief) # Calculate the distance to each thief
+                    if distance_to_thief <= safe_distance: # If the thief is in danger zone at that position
+                        # Calculate a higher cost to avoid going to the thief  (Weight * distance to thief)
+                        new_cost += danger_cost * (safe_distance - distance_to_thief + 1)
+                
+                # If the neighbor have not been visited or the new cost is lower than previous cost at that position
                 if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                    # Update the cost to go to that position
                     cost_so_far[neighbor] = new_cost
-                    priority = new_cost + heuristic(goal, neighbor)
-                    heapq.heappush(frontier, (priority, neighbor))
-                    came_from[neighbor] = current
+                    priority = new_cost + heuristic(goal, neighbor) # Calculate new priortity
+                    heapq.heappush(frontier, (priority, neighbor)) # Push it to the min heap
+                    came_from[neighbor] = current # Update where it came from to get there
 
     # If goal is not in came_from, no valid path was found
     if goal not in came_from:
@@ -131,11 +143,12 @@ def a_star_search(start, goal, thief_positions):
     path.reverse()
     return path
 
-def move_thieves(thief_positions, maze, ai_position, last_moves):
+def move_thieves(thief_positions, maze, last_moves):
     """Move each thief to a new position, avoiding backtracking unless at a dead end."""
     new_thief_positions = []
     updated_last_moves = []
 
+    # Goes over each thief last move
     for i, thief in enumerate(thief_positions):
         last_move = last_moves[i]  # Get the last move of the current thief
 
@@ -189,38 +202,48 @@ def main():
                 sys.exit()
 
         # Move thieves
-        thief_positions, last_moves = move_thieves(thief_positions, maze, current_position, last_moves)
+        thief_positions, last_moves = move_thieves(thief_positions, maze, last_moves)
+
+        if current_position in thief_positions:
+            print(f"Collision with a thief at {current_position}! Game over.")
+            break
 
         # Draw the maze, coins, and thieves
         screen.fill(WHITE)
         draw_maze(thief_positions)
 
-        for thief in thief_positions:
-            thief_x = thief[1] * CELL_SIZE
-            thief_y = thief[0] * CELL_SIZE
-            pygame.draw.rect(screen, RED, (thief_x, thief_y, CELL_SIZE, CELL_SIZE))
-
         # Update AI logic
         remaining_coins = [coin for coin in coin_positions if coin not in coin_collected]
 
         if remaining_coins:
-            furthest_coin = max(remaining_coins, key=lambda coin: heuristic(goal_position, coin))
-            path_to_coin = a_star_search(current_position, furthest_coin, thief_positions)
+            closest_coin = min(remaining_coins, key=lambda coin: heuristic(current_position, coin))
+            path_to_coin = a_star_search(current_position, closest_coin, thief_positions)
 
             if path_to_coin:
                 next_step = path_to_coin[1]
                 current_position = next_step
+                if current_position in thief_positions:
+                    print(f"Collision with a thief at {current_position}! Game over.")
+                    break
                 step_counter += 1
 
-                if current_position == furthest_coin:
-                    coin_collected.add(furthest_coin)
-                    print(f"Collected coin at {furthest_coin}")
+                if current_position == closest_coin:
+                    coin_collected.add(closest_coin)
+                    print(f"Collected coin at {closest_coin}")
+
+                    # Replace coin with a path (0) in the maze
+                    maze[closest_coin[0]][closest_coin[1]] = 0
+                    # Update the coin_positions to path when the coin is collected
+                    coin_positions.remove(closest_coin)
         else:
             path_to_goal = a_star_search(current_position, goal_position, thief_positions)
 
             if path_to_goal:
                 next_step = path_to_goal[1]
                 current_position = next_step
+                if current_position in thief_positions:
+                    print(f"Collision with a thief at {current_position}! Game over.")
+                    break
                 step_counter += 1
 
                 if current_position == goal_position:
