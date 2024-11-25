@@ -11,9 +11,10 @@ RED = (255, 0, 0)  # Thief color
 YELLOW = (255, 215, 0)  # Coin color
 BLUE = (0, 0, 255)  # Goal color
 
-# Ensure you adjust `CELL_SIZE` to fit the new maze into the screen dimensions
+# Ensure you adjust CELL_SIZE to fit the new maze into the screen dimensions
 CELL_SIZE = 20  # Smaller cell size for the larger maze
 WIDTH, HEIGHT = 30 * CELL_SIZE, 30 * CELL_SIZE
+
 
 # Initialize Pygame
 pygame.init()
@@ -46,7 +47,7 @@ maze = [
     [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1], #last edit
     [1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
     [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
-    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
@@ -58,7 +59,7 @@ thief_positions = [(9, 15), (18, 6), (25, 20), (5, 25), (22, 14)]  # 5 thieves
 coin_positions = [
     (9,16), (18, 8), (25,22), (5, 26), (7, 8), (16, 18), (22, 20), (5, 1), (18, 1), (26, 1)
 ]  # 10 coins
-goal_position = (26, 26)  # Goal position updated for the larger grid
+goal_position = (26, 29)  # Goal position updated for the larger grid
 
 
 # Function to draw the maze
@@ -195,11 +196,6 @@ def main():
         screen.fill(WHITE)
         draw_maze(thief_positions)
 
-        for thief in thief_positions:
-            thief_x = thief[1] * CELL_SIZE
-            thief_y = thief[0] * CELL_SIZE
-            pygame.draw.rect(screen, RED, (thief_x, thief_y, CELL_SIZE, CELL_SIZE))
-
         # Update AI logic
         remaining_coins = [coin for coin in coin_positions if coin not in coin_collected]
 
@@ -215,6 +211,11 @@ def main():
                 if current_position == furthest_coin:
                     coin_collected.add(furthest_coin)
                     print(f"Collected coin at {furthest_coin}")
+
+                    # Replace coin with a path (0) in the maze
+                    maze[furthest_coin[0]][furthest_coin[1]] = 0
+                    # Update the coin_positions to path when the coin is collected
+                    coin_positions.remove(furthest_coin)
         else:
             path_to_goal = a_star_search(current_position, goal_position, thief_positions)
 
