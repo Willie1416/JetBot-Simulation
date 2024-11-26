@@ -44,7 +44,7 @@ maze = [
     [1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
     [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
+    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
     [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
     [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -95,14 +95,15 @@ def a_star_search(start, goal, thief_positions):
     came_from = {start: None} # Map to keep track of where it has gone so far
     cost_so_far = {start: 0} # Map to keep track of the cost to get to that specific position
     
-    danger_cost = 25  # moderate penalty for being near thieves
-    safe_distance = 3  # avoid thiefs that are within 3 steps
+    danger_cost = 20  # high penalty for being near thieves
+    safe_distance = 6  # avoid thiefs that are within 2 steps
 
     while frontier:
         current = heapq.heappop(frontier)[1] # Get the next move
-
+        print(frontier)
         if current == goal:
             break
+
 
 
         # Explore neighbors (up, down, left, right)
@@ -116,9 +117,11 @@ def a_star_search(start, goal, thief_positions):
                 # Adjust cost based on proximity to thieves
                 for thief in thief_positions:
                     distance_to_thief = heuristic(neighbor, thief) # Calculate the distance to each thief
-                    if distance_to_thief <= safe_distance: # If the thief is in danger zone at that position
-                        # Calculate a higher cost to avoid going to the thief  (Weight * distance to thief)
-                        new_cost += danger_cost * (safe_distance - distance_to_thief + 1)
+                    
+                    if distance_to_thief <= 2:  # Avoid being very close
+                        new_cost += danger_cost * 100  # Large penalty to stay far from thieves
+                    elif distance_to_thief <= safe_distance:  # Near, but not immediate danger
+                        new_cost += danger_cost * (safe_distance - distance_to_thief + 1)**2
                 
                 # If the neighbor have not been visited or the new cost is lower than previous cost at that position
                 if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
