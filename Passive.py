@@ -117,10 +117,8 @@ def a_star_search(start, goal, thief_positions):
                 # Adjust cost based on proximity to thieves
                 for thief in thief_positions:
                     distance_to_thief = heuristic(neighbor, thief) # Calculate the distance to each thief
-                    
-                    if distance_to_thief <= 2:  # Avoid being very close
-                        new_cost += danger_cost * 100  # Large penalty to stay far from thieves
-                    elif distance_to_thief <= safe_distance:  # Near, but not immediate danger
+                
+                    if distance_to_thief <= safe_distance:  # Near, but not immediate danger
                         new_cost += danger_cost * (safe_distance - distance_to_thief + 1)**2
                 
                 # If the neighbor have not been visited or the new cost is lower than previous cost at that position
