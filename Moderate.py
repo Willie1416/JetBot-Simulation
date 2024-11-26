@@ -95,8 +95,8 @@ def a_star_search(start, goal, thief_positions):
     came_from = {start: None} # Map to keep track of where it has gone so far
     cost_so_far = {start: 0} # Map to keep track of the cost to get to that specific position
     
-    danger_cost = 25  # high penalty for being near thieves
-    safe_distance = 3  # avoid thiefs that are within 5 steps
+    danger_cost = 25  # moderate penalty for being near thieves
+    safe_distance = 3  # avoid thiefs that are within 3 steps
 
     while frontier:
         current = heapq.heappop(frontier)[1] # Get the next move
