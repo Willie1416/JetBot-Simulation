@@ -175,12 +175,22 @@ def move_thieves(thief_positions, maze, ai_position, last_moves):
 
 
 def main():
-    current_position = ai_start
-    coin_collected = set()
-    thief_positions = [(9, 15), (18, 6), (25, 20), (5, 25), (22, 14)]  # Example thief starting positions
-    last_moves = thief_positions[:]  # Initialize last_moves to be the starting positions of the thieves
-    step_counter = 0  # Initialize the step counter
+    # Initialize the game state
+    def reset_game_state():
+        initial_ai_position = ai_start
+        initial_coin_collected = set()
+        initial_thief_positions = [(9, 15), (18, 6), (25, 20), (5, 25), (22, 14)]  # Example thief starting positions
+        initial_last_moves = initial_thief_positions[:]  # Initialize last_moves to starting positions
+        initial_step_counter = 0
+        return (
+            initial_ai_position,
+            initial_coin_collected,
+            initial_thief_positions,
+            initial_last_moves,
+            initial_step_counter
+        )
 
+    current_position, coin_collected, thief_positions, last_moves, step_counter = reset_game_state()
     clock = pygame.time.Clock()
 
     while True:
@@ -191,6 +201,12 @@ def main():
 
         # Move thieves
         thief_positions, last_moves = move_thieves(thief_positions, maze, current_position, last_moves)
+
+        # Check if the AI is caught by a thief
+        if current_position in thief_positions:
+            print("AI was caught by a thief! Restarting the game...")
+            current_position, coin_collected, thief_positions, last_moves, step_counter = reset_game_state()
+            continue  # Restart the loop with the reset state
 
         # Draw the maze, coins, and thieves
         screen.fill(WHITE)
@@ -226,7 +242,7 @@ def main():
 
                 if current_position == goal_position:
                     print(f"AI reached the finish in {step_counter} steps!")
-                    break
+                    current_position, coin_collected, thief_positions, last_moves, step_counter = reset_game_state()
             else:
                 print("No reachable path to goal!")
                 break
@@ -244,3 +260,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
