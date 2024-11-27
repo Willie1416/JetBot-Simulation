@@ -1,0 +1,353 @@
+import pygame
+import sys
+import heapq
+import random
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os.path
+
+# Define colors
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)  # Thief color
+YELLOW = (255, 215, 0)  # Coin color
+BLUE = (0, 0, 255)  # Goal color
+
+# Ensure you adjust `CELL_SIZE` to fit the new maze into the screen dimensions
+CELL_SIZE = 20  
+WIDTH, HEIGHT = 30 * CELL_SIZE, 30 * CELL_SIZE
+
+# Initialize Pygame
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("AI Coin Collector")
+
+maze = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
+    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
+    [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1], 
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1],
+    [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1],
+    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+]
+
+
+# positions for AI, thieves, coins, and goal
+ai_start = (1, 1)
+coin_positions = [
+    (9,16), (18, 8), (25,22), (5, 26), (7, 8), (16, 18), (22, 20), (5, 1), (18, 1), (26, 1)
+]  # 10 coins
+goal_position = (26, 28) 
+
+TEST_NUMBER = 1 # TODO please change based on your test number
+MODEL = "Moderate" # TODO change based on your model
+
+def add_to_table(table, coords):
+    x, y = coords
+    table[x,y] += 1
+
+    return table
+
+def initialize_heatmap_table(maze):
+    np_maze = np.array(maze)
+    rows, cols = np_maze.shape
+    table = np.zeros((rows, cols))  # Initialize all Q-values to 0
+
+    # Loop through each state in the maze
+    for x in range(rows):
+        for y in range(cols):
+            if np_maze[x, y] == 1:  # Wall
+                table[x, y] = -np.inf  # All actions invalid at walls
+
+
+    return table
+
+def save_table(table, model, test_num):
+    file_name = model+"-"+str(test_num)+".csv"
+    df = pd.DataFrame(table)
+    df.to_csv(file_name,index=False, header=False)
+
+def read_table(model, test_num, maze):
+    file_name = model+"-"+str(test_num)+".csv"
+    if not os.path.isfile(file_name):
+        table = initialize_heatmap_table(maze)
+        print("table read")
+    else:
+        table = np.loadtxt(file_name,delimiter=",", dtype=float)
+        print("table initialized")
+    return table
+
+
+# Function to draw the maze
+def draw_maze(thief_positions):
+    for row in range(len(maze)):
+        for col in range(len(maze[row])):
+            color = BLACK if maze[row][col] == 1 else WHITE
+            pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+    
+    # Draw coins
+    for coin in coin_positions:
+        coin_x = coin[1] * CELL_SIZE
+        coin_y = coin[0] * CELL_SIZE
+        pygame.draw.circle(screen, YELLOW, (coin_x + CELL_SIZE // 2, coin_y + CELL_SIZE // 2), CELL_SIZE // 4)
+
+    # Draw thieves
+    for thief in thief_positions:
+        thief_x = thief[1] * CELL_SIZE
+        thief_y = thief[0] * CELL_SIZE
+        pygame.draw.rect(screen, RED, (thief_x, thief_y, CELL_SIZE, CELL_SIZE))
+
+    # Draw goal
+    goal_x = goal_position[1] * CELL_SIZE
+    goal_y = goal_position[0] * CELL_SIZE
+    pygame.draw.rect(screen, BLUE, (goal_x, goal_y, CELL_SIZE, CELL_SIZE))
+
+# Heuristic for A* search (Manhattan distance)
+def heuristic(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+# A* search algorithm with dynamic thief avoidance
+def a_star_search(start, goal, thief_positions):
+    frontier = []     # Min-Heap that stores the shortest next step to take
+    heapq.heappush(frontier, (0, start)) # Initialize min heap with start
+    came_from = {start: None} # Map to keep track of where it has gone so far
+    cost_so_far = {start: 0} # Map to keep track of the cost to get to that specific position
+    
+    danger_cost = 20  # high penalty for being near thieves
+    safe_distance = 10  # avoid thiefs that are within 2 steps
+
+    while frontier:
+        current = heapq.heappop(frontier)[1] # Get the next move
+        print(frontier)
+        if current == goal:
+            break
+
+
+
+        # Explore neighbors (up, down, left, right)
+        for direction in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+            neighbor = (current[0] + direction[0], current[1] + direction[1])
+
+            # Check if the neighbor is walkable
+            if 0 <= neighbor[0] < len(maze) and 0 <= neighbor[1] < len(maze[0]) and maze[neighbor[0]][neighbor[1]] == 0:
+                new_cost = cost_so_far[current] + 1  # Base cost to move to neighbor
+                
+                # Adjust cost based on proximity to thieves
+                for thief in thief_positions:
+                    distance_to_thief = heuristic(neighbor, thief) # Calculate the distance to each thief
+                    
+                    if distance_to_thief <= 2:  # Avoid being very close
+                        new_cost += danger_cost * 100  # Large penalty to stay far from thieves
+                    elif distance_to_thief <= safe_distance:  # Near, but not immediate danger
+                        new_cost += danger_cost * (safe_distance - distance_to_thief + 1)**2
+                
+                # If the neighbor have not been visited or the new cost is lower than previous cost at that position
+                if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                    # Update the cost to go to that position
+                    cost_so_far[neighbor] = new_cost
+                    priority = new_cost + heuristic(goal, neighbor) # Calculate new priortity
+                    heapq.heappush(frontier, (priority, neighbor)) # Push it to the min heap
+                    came_from[neighbor] = current # Update where it came from to get there
+
+
+    # If goal is not in came_from, no valid path was found
+    if goal not in came_from:
+        return []
+
+    # Reconstruct path
+    current = goal
+    path = []
+    while current != start:
+        path.append(current)
+        current = came_from[current]
+    path.append(start)
+    path.reverse()
+    return path
+
+def move_thieves(thief_positions, maze, last_moves):
+    """Move each thief to a new position, avoiding backtracking unless at a dead end."""
+    new_thief_positions = []
+    updated_last_moves = []
+
+    # Goes over each thief last move
+    for i, thief in enumerate(thief_positions):
+        last_move = last_moves[i]  # Get the last move of the current thief
+
+        # Generate possible moves (up, down, left, right)
+        possible_moves = [
+            (thief[0] - 1, thief[1]),  # Up
+            (thief[0] + 1, thief[1]),  # Down
+            (thief[0], thief[1] - 1),  # Left
+            (thief[0], thief[1] + 1)   # Right
+        ]
+
+        # Filter valid moves
+        valid_moves = [
+            move for move in possible_moves
+            if 0 <= move[0] < len(maze) and 0 <= move[1] < len(maze[0])  # Within bounds
+            and maze[move[0]][move[1]] != 1  # Not a wall
+            and move not in thief_positions  # Avoid overlapping with other thieves
+        ]
+
+        # Exclude the last move from valid options if there are other valid moves
+        if last_move in valid_moves and len(valid_moves) > 1:
+            valid_moves.remove(last_move)
+
+        # Decide on movement strategy (random, chasing AI, etc.)
+        if valid_moves:
+            # Random movement
+            new_position = random.choice(valid_moves)
+            new_thief_positions.append(new_position)
+            updated_last_moves.append(thief)  # Update the last move to the current position
+        else:
+            # No valid moves, stay in place
+            new_thief_positions.append(thief)
+            updated_last_moves.append(last_move)  # Keep the last move as is
+
+    return new_thief_positions, updated_last_moves
+
+def create_heatmap(maze_table, test_num, model, cbar_kw=None, cbarlabel=""):
+
+    if cbar_kw is None:
+        cbar_kw = {}
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(maze_table)
+
+     # Create colorbar
+    cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
+    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+
+    row = range(0, maze_table.shape[0])
+    col = range(0, maze_table.shape[1])
+
+    # Show all ticks and label them with the respective list entries
+    ax.set_xticks(np.arange(len(row)), labels=row)
+    ax.set_yticks(np.arange(len(col)), labels=col)
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+            rotation_mode="anchor")
+
+    ax.set_title("Steps taken by AI move (test No."+str(test_num)+" model="+model)
+    fig.tight_layout()
+
+    file_name = model+"-"+str(test_num)+".png"
+
+    # save heatmap as image
+    plt.savefig(file_name)
+    plt.show()
+
+
+
+def main():
+    current_position = ai_start
+    coin_collected = set()
+    thief_positions = [(9, 15), (18, 6), (25, 20), (5, 25), (22, 14)]  # Example thief starting positions
+    last_moves = thief_positions[:]  # Initialize last_moves to be the starting positions of the thieves
+    step_counter = 0  # Initialize the step counter
+
+    clock = pygame.time.Clock()
+
+    table = read_table(MODEL, TEST_NUMBER, maze)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # Move thieves
+        thief_positions, last_moves = move_thieves(thief_positions, maze, last_moves)
+
+        if current_position in thief_positions:
+            print(f"Collision with a thief at {current_position}! Game over.")
+            break
+
+        # Draw the maze, coins, and thieves
+        screen.fill(WHITE)
+        draw_maze(thief_positions)
+
+        # Update AI logic
+        remaining_coins = [coin for coin in coin_positions if coin not in coin_collected]
+
+        if remaining_coins:
+            closest_coin = min(remaining_coins, key=lambda coin: heuristic(current_position, coin))
+            path_to_coin = a_star_search(current_position, closest_coin, thief_positions)
+
+            if path_to_coin:
+                next_step = path_to_coin[1]
+                current_position = next_step
+                table = add_to_table(table, next_step) # adding to np array for record
+                if current_position in thief_positions:
+                    print(f"Collision with a thief at {current_position}! Game over.")
+                    break
+                step_counter += 1
+
+                if current_position == closest_coin:
+                    coin_collected.add(closest_coin)
+                    print(f"Collected coin at {closest_coin}")
+
+                    # Replace coin with a path (0) in the maze
+                    maze[closest_coin[0]][closest_coin[1]] = 0
+                    # Update the coin_positions to path when the coin is collected
+                    coin_positions.remove(closest_coin)
+        else:
+            path_to_goal = a_star_search(current_position, goal_position, thief_positions)
+
+            if path_to_goal:
+                next_step = path_to_goal[1]
+                current_position = next_step
+                table = add_to_table(table, next_step) # adding to np array for record
+                if current_position in thief_positions:
+                    print(f"Collision with a thief at {current_position}! Game over.")
+                    break
+                step_counter += 1
+
+                if current_position == goal_position:
+                    print(f"AI reached the finish in {step_counter} steps!")
+                    break
+            else:
+                print("No reachable path to goal!")
+                break
+
+        # Draw the AI at its current position
+        ai_x = current_position[1] * CELL_SIZE
+        ai_y = current_position[0] * CELL_SIZE
+        pygame.draw.rect(screen, GREEN, (ai_x, ai_y, CELL_SIZE, CELL_SIZE))
+
+        # Update the screen
+        pygame.display.flip()
+
+        # Cap the frame rate
+        clock.tick(5)
+    
+    create_heatmap(table, TEST_NUMBER, MODEL)
+    save_table(table, MODEL, TEST_NUMBER)
+
+if __name__ == "__main__":
+    main()
