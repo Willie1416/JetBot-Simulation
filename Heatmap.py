@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib as mpl
 import pandas as pd
+import os
 
 
 
@@ -36,26 +37,40 @@ maze = np.array([
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ])
 
-def initialize_heatmap_table(maze):
-    rows, cols = maze.shape
-    table = np.zeros((rows, cols))  # Initialize all Q-values to 0
-
-    # Loop through each state in the maze
-    for x in range(rows):
-        for y in range(cols):
-            if maze[x, y] == 1:  # Wall
-                table[x, y] = -np.inf  # All actions invalid at walls
-    
-    print(table)
-
-    return table
-
 def add_to_table(table, coords):
     x, y = coords
     table[x,y] += 1
 
     return table
 
+def initialize_heatmap_table(maze):
+    np_maze = np.array(maze)
+    rows, cols = np_maze.shape
+    table = np.zeros((rows, cols))  # Initialize all Q-values to 0
+
+    # Loop through each state in the maze
+    for x in range(rows):
+        for y in range(cols):
+            if np_maze[x, y] == 1:  # Wall
+                table[x, y] = -np.inf  # All actions invalid at walls
+
+
+    return table
+
+def save_table(table, model, test_num):
+    file_name = model+"-"+str(test_num)+".csv"
+    df = pd.DataFrame(table)
+    df.to_csv(file_name,index=False, header=False)
+
+def read_table(model, test_num, maze):
+    file_name = model+"-"+str(test_num)+".csv"
+    if not os.path.isfile(file_name):
+        table = initialize_heatmap_table(maze)
+        print("table read")
+    else:
+        table = np.loadtxt(file_name,delimiter=",", dtype=float)
+        print("table initialized")
+    return table
 
 def create_heatmap(maze_table, test_num, model, cbar_kw=None, cbarlabel=""):
 
@@ -90,23 +105,5 @@ def create_heatmap(maze_table, test_num, model, cbar_kw=None, cbarlabel=""):
     plt.show()
 
 
-def save_table(table, model, test_num):
-    file_name = model+"-"+str(test_num)+".csv"
-    df = pd.DataFrame(table)
-    df.to_csv(file_name,index=False, header=False)
-
-def read_table(model, test_num):
-    file_name = model+"-"+str(test_num)+".csv"
-    return np.loadtxt(file_name,delimiter=",", dtype=float)
 
 
-TEST_NUMBER = 0
-MODEL = "test model"
-
-
-table = initialize_heatmap_table(maze) # TODO do only once when initializing other than that, just use read_table to read previous table
-table = read_table(MODEL, TEST_NUMBER)
-table = add_to_table(table, (1,1)) # put (x,y) = next step, everytime making a move
-save_table(table, MODEL, TEST_NUMBER)
-
-create_heatmap(table, TEST_NUMBER, MODEL) # TODO create heatmap everytime you test AND/OR one time after all the test with the table with all the records

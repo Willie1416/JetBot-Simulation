@@ -4,6 +4,8 @@ import heapq
 import random
 import pandas as pd
 import os
+import Heatmap
+
 
 DATA_FILE = 'maze_data.csv'
 
@@ -60,6 +62,9 @@ maze = [
 # positions for AI, thieves, coins, and goal
 ai_start = (1, 1)
 goal_position = (26, 28)  
+
+TEST_NUMBER = 1 # TODO please change based on your test number
+MODEL = "Moderate" # TODO change based on your model
 
 
 # Function to draw the maze
@@ -232,6 +237,8 @@ def main():
 
     clock = pygame.time.Clock()
 
+    table = Heatmap.read_table(MODEL, TEST_NUMBER, maze)
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -259,6 +266,8 @@ def main():
             if path_to_coin:
                 next_step = path_to_coin[1]
                 current_position = next_step
+                table = Heatmap.add_to_table(table, current_position) # adding to np array for record
+
                 if current_position in thief_positions:
                     print(f"Collision with a thief at {current_position}! Game over.")
                     break
@@ -278,6 +287,8 @@ def main():
             if path_to_goal:
                 next_step = path_to_goal[1]
                 current_position = next_step
+                table = Heatmap.add_to_table(table, current_position) # adding to np array for record
+
                 if current_position in thief_positions:
                     print(f"Collision with a thief at {current_position}! Game over.")
                     break
@@ -305,6 +316,8 @@ def main():
     maze_data_df = log_maze_data (step_counter, completed_maze, maze_data_df)
     save_data(maze_data_df)
     print(maze_data_df)
+    Heatmap.create_heatmap(table, TEST_NUMBER, MODEL)
+    Heatmap.save_table(table, MODEL, TEST_NUMBER)
 
 if __name__ == "__main__":
     
