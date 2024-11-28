@@ -102,7 +102,6 @@ def create_heatmap(maze_table, test_num, model, cbar_kw=None, cbarlabel=""):
 
     # save heatmap as image
     plt.savefig(file_name)
-    plt.show()
 
 
 
