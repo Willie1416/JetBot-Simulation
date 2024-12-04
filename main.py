@@ -8,15 +8,6 @@ import os
 DATA_FILE = 'maze_data.csv'
 
 
-
-# Initialize Pygame
-pygame.init()
-
-screen_width = 800
-screen_height = 560
-
-screen = pygame.display.set_mode((screen_width, screen_height))  # Example screen size
-
 # Define colors
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
@@ -25,12 +16,15 @@ RED = (255, 0, 0)  # Thief color
 YELLOW = (255, 215, 0)  # Coin color
 BLUE = (0, 0, 255)  # Goal color
 
-
-
-# Ensure you adjust CELL_SIZE to fit the new maze into the screen dimensions
+# Ensure you adjust `CELL_SIZE` to fit the new maze into the screen dimensions
 CELL_SIZE = 20  
-WIDTH, HEIGHT = 20 * CELL_SIZE, 50 * CELL_SIZE
+WIDTH, HEIGHT = 30 * CELL_SIZE, 30 * CELL_SIZE
 
+screen_width = 800
+screen_height = 560
+
+# Initialize Pygame
+pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height))  # Example screen size
 pygame.display.set_caption("Maze Game")
 font = pygame.font.SysFont("New Roman Times", 24) #new code added 
@@ -67,13 +61,8 @@ maze = [
 ]
 
 
-# Set up the font
-font = pygame.font.SysFont('Arial', 24)
-
-
 # positions for AI, thieves, coins, and goal
 ai_start = (1, 1)
-coin_positions = [(9,16), (18, 8), (25,22), (5, 26), (7, 8), (16, 18), (22, 20), (5, 1), (18, 1), (26, 1)]  
 goal_position = (26, 28)  
 
 
@@ -106,14 +95,13 @@ def heuristic(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 # A* search algorithm with dynamic thief avoidance
-def a_star_search(start, goal, thief_positions):
+def a_star_search(start, goal, thief_positions, danger_cost, safe_distance):
     frontier = []     # Min-Heap that stores the shortest next step to take
     heapq.heappush(frontier, (0, start)) # Initialize min heap with start
     came_from = {start: None} # Map to keep track of where it has gone so far
     cost_so_far = {start: 0} # Map to keep track of the cost to get to that specific position
     
-    danger_cost = 30  # high penalty for being near thieves
-    safe_distance = 3  # avoid thiefs that are within 2 steps
+
 
     while frontier:
         current = heapq.heappop(frontier)[1] # Get the next move
@@ -134,7 +122,9 @@ def a_star_search(start, goal, thief_positions):
                 for thief in thief_positions:
                     distance_to_thief = heuristic(neighbor, thief) # Calculate the distance to each thief
                     
-                    if distance_to_thief <= safe_distance:  # Near, but not immediate danger
+                    if distance_to_thief <= 2:
+                        new_cost += danger_cost*100
+                    elif distance_to_thief <= safe_distance:  # Near, but not immediate danger
                         new_cost += danger_cost * (safe_distance - distance_to_thief + 1)**2
                 
                 # If the neighbor have not been visited or the new cost is lower than previous cost at that position
@@ -202,37 +192,6 @@ def move_thieves(thief_positions, maze, last_moves):
 
     return new_thief_positions, updated_last_moves
 
-def load_or_initialize_data():
-    """
-    Loads the maze data from a CSV file or initializes a new DataFrame if the file doesn't exist.
-    """
-    if os.path.exists(DATA_FILE):
-        return pd.read_csv(DATA_FILE)
-    else:
-        # Initialize a new DataFrame if the file doesn't exist
-        return pd.DataFrame(columns=["Steps", "Completed_Maze", "Time_Taken"])
-
-def save_data(dataframe):
-    """
-    Saves the DataFrame to a CSV file.
-    """
-    dataframe.to_csv(DATA_FILE, index=False)
-
-
-def log_maze_data(steps, completed, df):
-    """
-    Logs data about the maze into the DataFrame.
-    """
-    # Convert the completed boolean to a string
-    completed_str = "Yes" if completed else "No"
-    # Create a new row of data
-    new_row = {
-        "Steps": steps,
-        "Completed_Maze": completed_str,
-    }
-    # Append the new row to the DataFrame
-    return pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-
 def draw_coin_count(count):
     coin_font = pygame.font.SysFont("New Roman Times", 20)
     text = coin_font.render(f"Coins Collected: {count} ", True, BLACK)
@@ -247,123 +206,9 @@ def display_text():
     screen.blit(text, (x, y))
 
 # Shows the coin index  
-def display_coinindex(coin):
-    index_font = pygame.font.SysFont("New Roman Times", 20)
-    
-    for i in range(len(coin)):
-        text = index_font.render(f"Coin Index: {coin} ", True, BLACK)
-        screen.blit(text, (650, 65))
-
-
-def main():
-    coin_count = 0
-
-    maze_data_df = load_or_initialize_data()
-    current_position = ai_start
-    coin_collected = set()
-    coin_positions = [(9,16), (18, 8), (25,22), (5, 26), (7, 8), (16, 18), (22, 20), (5, 1), (18, 1), (26, 1)]  # 10 coins
-    thief_positions = [(9, 15), (18, 6), (25, 20), (5, 25), (22, 14)]  # Example thief starting positions
-    last_moves = thief_positions[:]  # Initialize last_moves to be the starting positions of the thieves
-    step_counter = 0  # Initialize the step counter
-    completed_maze = False
-
-
-    clock = pygame.time.Clock()
-
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        # Move thieves
-        thief_positions, last_moves = move_thieves(thief_positions, maze, last_moves)
-
-        if current_position in thief_positions:
-            print(f"Collision with a thief at {current_position}! Game over.")
-            break
-
-        # Draw the maze, coins, and thieves
-        screen.fill(WHITE)
-        draw_maze(thief_positions, coin_positions)
-        display_text()
-
-
-        # Update AI logic
-        remaining_coins = [coin for coin in coin_positions if coin not in coin_collected]
-
-        if remaining_coins:
-            closest_coin = min(remaining_coins, key=lambda coin: heuristic(current_position, coin))
-            path_to_coin = a_star_search(current_position, closest_coin, thief_positions)
-
-            if path_to_coin:
-                next_step = path_to_coin[1]
-                current_position = next_step
-                if current_position in thief_positions:
-                    print(f"Collision with a thief at {current_position}! Game over.")
-                    break
-                step_counter += 1
-
-                if current_position == closest_coin:
-                    coin_collected.add(closest_coin)
-                    print(f"Collected coin at {closest_coin}")
-                    coin_count += 1
-                   
-
-                    
-
-                    # Replace coin with a path (0) in the maze
-                    maze[closest_coin[0]][closest_coin[1]] = 0
-                    # Update the coin_positions to path when the coin is collected
-                    coin_positions.remove(closest_coin)
-                    
-                    coin_collected.add(current_position) #new code added
-        else:
-            path_to_goal = a_star_search(current_position, goal_position, thief_positions)
-
-            if path_to_goal:
-                next_step = path_to_goal[1]
-                current_position = next_step
-                if current_position in thief_positions:
-                    print(f"Collision with a thief at {current_position}! Game over.")
-                    break
-                step_counter += 1
-
-                if current_position == goal_position:
-                    print(f"AI reached the finish in {step_counter} steps!")
-                    completed_maze = True
-                    break
-            else:
-                print("No reachable path to goal!")
-                break
-
-        # Draw the AI at its current position
-        ai_x = current_position[1] * CELL_SIZE
-        ai_y = current_position[0] * CELL_SIZE
-        pygame.draw.rect(screen, GREEN, (ai_x, ai_y, CELL_SIZE, CELL_SIZE))
-
-        draw_coin_count(coin_count)
-        display_coinindex(closest_coin)
-        
-        # Update the screen
-        pygame.display.flip()
-        # Draw the coin count
-        
-    
-
-        # Cap the frame rate
-        clock.tick(5)
-
-    maze_data_df = log_maze_data (step_counter, completed_maze, maze_data_df)
-    save_data(maze_data_df)
-    print(maze_data_df)
-
-if __name__ == "__main__":
-    
-    for _ in range(10):
-        main()
-
-
-
-
+def display_coinindex(collected_indices):
+    line_spacing = 20  # Vertical spacing between lines
+    index_font = pygame.font.SysFont("New Roman Times", 20)  # Font for text
+    for i, coin in enumerate(collected_indices):
+        text = index_font.render(f"Coin Index: {coin}", True, BLACK)
+        screen.blit(text, (650, 65 + i * line_spacing))  # Display each index in a new line
