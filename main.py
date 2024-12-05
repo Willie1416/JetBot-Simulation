@@ -24,6 +24,8 @@ WIDTH, HEIGHT = 30 * CELL_SIZE, 30 * CELL_SIZE
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AI Coin Collector")
+font = pygame.font.SysFont("New Roman Times", 24) 
+
 
 maze = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -188,4 +190,24 @@ def move_thieves(thief_positions, maze, last_moves):
 
     return new_thief_positions, updated_last_moves
 
+def draw_coin_count(count):
+    coin_font = pygame.font.SysFont("New Roman Times", 20)
+    text = coin_font.render(f"Coins Collected: {count} ", True, BLACK)
+    screen.blit(text, (650, 45))  # Draw the text in the top-left corner
+
+def display_text():
+    text = font.render('Maze Game', True, BLACK)
+    # Set position to top-left with a small padding
+    x = 650  # 10 pixels from the left edge
+    y = 10  # 10 pixels from the top edge
+
+    screen.blit(text, (x, y))
+
+# Shows the coin index  
+def display_coinindex(collected_indices):
+    line_spacing = 20  # Vertical spacing between lines
+    index_font = pygame.font.SysFont("New Roman Times", 20)  # Font for text
+    for i, coin in enumerate(collected_indices):
+        text = index_font.render(f"Coin Index: {coin}", True, BLACK)
+        screen.blit(text, (650, 65 + i * line_spacing))  # Display each index in a new line
 

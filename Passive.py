@@ -30,8 +30,8 @@ BLUE = (0, 0, 255)  # Goal color
 
 # Ensure you adjust `CELL_SIZE` to fit the new maze into the screen dimensions
 CELL_SIZE = 20  
-WIDTH, HEIGHT = 30 * CELL_SIZE, 30 * CELL_SIZE
-
+screen_width = 800
+screen_height = 560
 
 maze = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -66,8 +66,11 @@ maze = [
 
 # Initialize Pygame
 pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("AI Coin Collector")
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("Maze Game")
+font = pygame.font.SysFont("New Roman Times", 24) #new code added 
+screen_font = pygame.font.SysFont("New Roman Times", 17) # new code added here
+line_spacing = 80
 
 
 # positions for AI, and goal
@@ -77,6 +80,8 @@ goal_position = (26, 28)
 
 def main():
     
+    collected_indices = []
+
     maze_data_df = DataCollecter.load_or_initialize_data(DATA_FILE)
     current_position = ai_start
     coin_collected = set()
@@ -103,6 +108,8 @@ def main():
         # Draw the maze, coins, and thieves
         screen.fill(WHITE)
         Main.draw_maze(thief_positions, coin_positions)
+        Main.display_text()
+
 
         # Update AI logic
         remaining_coins = [coin for coin in coin_positions if coin not in coin_collected]
@@ -126,6 +133,8 @@ def main():
                     coin_collected.add(closest_coin)
                     print(f"Collected coin at {closest_coin}")
                     coins_collected +=1
+                    collected_indices.append(closest_coin)
+
 
                     # Replace coin with a path (0) in the maze
                     maze[closest_coin[0]][closest_coin[1]] = 0
@@ -147,6 +156,10 @@ def main():
 
                 if current_position == goal_position:
                     print(f"AI reached the finish in {step_counter} steps!")
+                    text = screen_font.render('You collected all the coin', True, BLACK)
+                    screen.blit(text, (650, 450))
+                    pygame.display.flip()
+                    pygame.time.delay(2000)
                     completed_maze = True
                     break
             else:
@@ -158,8 +171,12 @@ def main():
         ai_y = current_position[0] * CELL_SIZE
         pygame.draw.rect(screen, GREEN, (ai_x, ai_y, CELL_SIZE, CELL_SIZE))
 
+        Main.draw_coin_count(coins_collected)
+        Main.display_coinindex(collected_indices)
+        
         # Update the screen
         pygame.display.flip()
+        
 
         # Cap the frame rate
         clock.tick(5)
