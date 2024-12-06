@@ -176,7 +176,7 @@ def main():
         pygame.display.flip()
 
         # Cap the frame rate
-        clock.tick(5)
+        clock.tick(50)
 
     maze_data_df = DataCollecter.log_maze_data(step_counter, completed_maze, coins_collected, maze_data_df)
     DataCollecter.save_data(maze_data_df, DATA_FILE)
