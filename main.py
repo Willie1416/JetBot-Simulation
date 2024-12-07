@@ -1,11 +1,6 @@
 import pygame
-import sys
 import heapq
 import random
-import pandas as pd
-import os
-
-DATA_FILE = 'maze_data.csv'
 
 
 # Define colors
@@ -16,7 +11,6 @@ RED = (255, 0, 0)  # Thief color
 YELLOW = (255, 215, 0)  # Coin color
 BLUE = (0, 0, 255)  # Goal color
 
-# Ensure you adjust `CELL_SIZE` to fit the new maze into the screen dimensions
 CELL_SIZE = 20  
 WIDTH, HEIGHT = 30 * CELL_SIZE, 30 * CELL_SIZE
 
@@ -88,7 +82,7 @@ def draw_maze(thief_positions, coin_positions):
     goal_y = goal_position[0] * CELL_SIZE
     pygame.draw.rect(screen, BLUE, (goal_x, goal_y, CELL_SIZE, CELL_SIZE))
 
-# Heuristic for A* search (Manhattan distance)
+# Heuristic for A* search, Manhattan distance
 def heuristic(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
@@ -108,7 +102,7 @@ def a_star_search(start, goal, thief_positions, danger_cost, safe_distance):
             break
 
 
-        # Explore neighbors (up, down, left, right)
+        # Explore neighbors up, down, left, right
         for direction in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
             neighbor = (current[0] + direction[0], current[1] + direction[1])
 
@@ -149,7 +143,7 @@ def a_star_search(start, goal, thief_positions, danger_cost, safe_distance):
     return path
 
 def move_thieves(thief_positions, maze, last_moves):
-    """Move each thief to a new position, avoiding backtracking unless at a dead end."""
+    #Move each thief to a new position, avoiding backtracking unless at a dead end.
     new_thief_positions = []
     updated_last_moves = []
 
@@ -157,7 +151,7 @@ def move_thieves(thief_positions, maze, last_moves):
     for i, thief in enumerate(thief_positions):
         last_move = last_moves[i]  # Get the last move of the current thief
 
-        # Generate possible moves (up, down, left, right)
+        # Generate possible moves up, down, left, right
         possible_moves = [
             (thief[0] - 1, thief[1]),  # Up
             (thief[0] + 1, thief[1]),  # Down
@@ -177,7 +171,7 @@ def move_thieves(thief_positions, maze, last_moves):
         if last_move in valid_moves and len(valid_moves) > 1:
             valid_moves.remove(last_move)
 
-        # Decide on movement strategy (random, chasing AI, etc.)
+        # Pick a random move out of available moves
         if valid_moves:
             # Random movement
             new_position = random.choice(valid_moves)
